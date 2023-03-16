@@ -18,12 +18,12 @@ def add_episode():
     if not title or not podcast_id or not description:
         return make_response(jsonify({"message": "Missing required data"}), 400)
 
-    new_episode = Episode(title=title, podcast_id=podcast_id, description=description)
+    new_episode = Episode(
+        title=title, podcast_id=podcast_id, description=description)
     db.session.add(new_episode)
     db.session.commit()
 
     return make_response(jsonify({"message": "Episode added successfully"}), 201)
-
 
 
 @app.route('/api/episodes', methods=['GET'])
@@ -39,4 +39,33 @@ def get_episode(episode_id):
     result = episode_schema.dump(episode)
     return make_response(jsonify(result), 200)
 
-# Add/update/delete routes if required
+
+@app.route('/api/episodes/<int:episode_id>', methods=['PUT'])
+@jwt_required()
+def update_episode(episode_id):
+    episode = Episode.query.get_or_404(episode_id)
+
+    title = request.json.get('title', None)
+    podcast_id = request.json.get('podcast_id', None)
+    description = request.json.get('description', None)
+
+    if title:
+        episode.title = title
+    if podcast_id:
+        episode.podcast_id = podcast_id
+    if description:
+        episode.description = description
+
+    db.session.commit()
+
+    return make_response(jsonify({"message": "Episode updated successfully"}), 200)
+
+
+@app.route('/api/episodes/<int:episode_id>', methods=['DELETE'])
+@jwt_required()
+def delete_episode(episode_id):
+    episode = Episode.query.get_or_404(episode_id)
+    db.session.delete(episode)
+    db.session.commit()
+
+    return make_response(jsonify({"message": "Episode deleted successfully"}), 200)
