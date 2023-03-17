@@ -7,7 +7,7 @@ episode_bp = Blueprint("episode_bp", __name__)
 episode_schema = EpisodeSchema()
 episodes_schema = EpisodeSchema(many=True)
 
-
+# Add a new episode
 @app.route('/api/episodes', methods=['POST'])
 @jwt_required()
 def add_episode():
@@ -18,6 +18,7 @@ def add_episode():
     if not title or not podcast_id or not description:
         return make_response(jsonify({"message": "Missing required data"}), 400)
 
+    # Create a new Episode instance and add it to the database
     new_episode = Episode(
         title=title, podcast_id=podcast_id, description=description)
     db.session.add(new_episode)
@@ -25,24 +26,27 @@ def add_episode():
 
     return make_response(jsonify({"message": "Episode added successfully"}), 201)
 
-
+# Retrieve all episodes
 @app.route('/api/episodes', methods=['GET'])
 def get_all_episodes():
+    # Query the database for all Episode records
     episodes = Episode.query.all()
     result = episodes_schema.dump(episodes)
     return make_response(jsonify(result), 200)
 
-
+# Retrieve a single episode by its ID
 @app.route('/api/episodes/<int:episode_id>', methods=['GET'])
 def get_episode(episode_id):
+    # Query the database for the Episode with the given ID, return a 404 if not found
     episode = Episode.query.get_or_404(episode_id)
     result = episode_schema.dump(episode)
     return make_response(jsonify(result), 200)
 
-
+# Update an episode
 @app.route('/api/episodes/<int:episode_id>', methods=['PUT'])
 @jwt_required()
 def update_episode(episode_id):
+    # Query the database for the Episode with the given ID, return a 404 if not found
     episode = Episode.query.get_or_404(episode_id)
 
     title = request.json.get('title', None)
@@ -56,15 +60,18 @@ def update_episode(episode_id):
     if description:
         episode.description = description
 
+    # Commit the changes to the database
     db.session.commit()
 
     return make_response(jsonify({"message": "Episode updated successfully"}), 200)
 
-
+# Delete an episode
 @app.route('/api/episodes/<int:episode_id>', methods=['DELETE'])
 @jwt_required()
 def delete_episode(episode_id):
+    # Query the database for the Episode with the given ID, return a 404 if not found
     episode = Episode.query.get_or_404(episode_id)
+    # Remove the Episode from the database
     db.session.delete(episode)
     db.session.commit()
 
