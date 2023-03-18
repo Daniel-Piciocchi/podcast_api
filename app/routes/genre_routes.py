@@ -9,6 +9,8 @@ genre_schema = GenreSchema()
 genres_schema = GenreSchema(many=True)
 
 # Add a new genre
+
+
 @genre_bp.route('/api/genres', methods=['POST'])
 @jwt_required()
 @admin_required
@@ -26,6 +28,8 @@ def add_genre():
     return make_response(jsonify({"message": "Genre added successfully"}), 201)
 
 # Retrieve all genres
+
+
 @genre_bp.route('/api/genres', methods=['GET'])
 def get_all_genres():
     # Query the database for all Genre records
@@ -34,20 +38,32 @@ def get_all_genres():
     return make_response(jsonify(result), 200)
 
 # Retrieve a single genre by its ID
+
+
 @genre_bp.route('/api/genres/<int:genre_id>', methods=['GET'])
 def get_genre(genre_id):
-    # Query the database for the Genre with the given ID, return a 404 if not found
-    genre = Genre.query.get_or_404(genre_id)
+    # Query the database for the Genre with the given ID
+    genre = Genre.query.get(genre_id)
+
+    if genre is None:
+        return make_response(jsonify({"message": "There is no genre with that ID"}), 404)
+
     result = genre_schema.dump(genre)
     return make_response(jsonify(result), 200)
 
 # Update a genre
+
+
 @genre_bp.route('/api/genres/<int:genre_id>', methods=['PUT'])
 @jwt_required()
 @admin_required
 def update_genre(genre_id):
-    # Query the database for the Genre with the given ID, return a 404 if not found
-    genre = Genre.query.get_or_404(genre_id)
+    # Query the database for the Genre with the given ID
+    genre = Genre.query.get(genre_id)
+
+    if genre is None:
+        return make_response(jsonify({"message": "There is no genre with that ID"}), 404)
+
     name = request.json.get('name', None)
 
     if not name:
@@ -60,12 +76,17 @@ def update_genre(genre_id):
     return make_response(jsonify({"message": "Genre updated successfully"}), 200)
 
 # Delete a genre
+
+
 @genre_bp.route('/api/genres/<int:genre_id>', methods=['DELETE'])
 @jwt_required()
 @admin_required
 def delete_genre(genre_id):
-    # Query the database for the Genre with the given ID, return a 404 if not found
-    genre = Genre.query.get_or_404(genre_id)
+    # Query the database for the Genre with the given ID
+    genre = Genre.query.get(genre_id)
+
+    if genre is None:
+        return make_response(jsonify({"message": "There is no genre with that ID"}), 404)
 
     # Check if the Genre has any associated Podcasts
     if genre.podcasts:

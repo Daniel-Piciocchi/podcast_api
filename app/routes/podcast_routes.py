@@ -9,6 +9,8 @@ podcast_schema = PodcastSchema()
 podcasts_schema = PodcastSchema(many=True)
 
 # Add a new podcast
+
+
 @podcast_bp.route('/api/podcasts', methods=['POST'])
 @jwt_required()
 @admin_required
@@ -35,6 +37,8 @@ def add_podcast():
     return make_response(jsonify({"message": "Podcast added successfully"}), 201)
 
 # Retrieve all podcasts
+
+
 @podcast_bp.route('/api/podcasts', methods=['GET'])
 def get_all_podcasts():
     # Query the database for all Podcast records
@@ -43,20 +47,31 @@ def get_all_podcasts():
     return make_response(jsonify(result), 200)
 
 # Retrieve a single podcast by its ID
+
+
 @podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['GET'])
 def get_podcast(podcast_id):
-    # Query the database for the Podcast with the given ID, return a 404 if not found
-    podcast = Podcast.query.get_or_404(podcast_id)
+    # Query the database for the Podcast with the given ID
+    podcast = Podcast.query.get(podcast_id)
+
+    if podcast is None:
+        return make_response(jsonify({"message": "There is no podcast with that ID"}), 404)
+
     result = podcast_schema.dump(podcast)
     return make_response(jsonify(result), 200)
 
 # Update a podcast
+
+
 @podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['PUT'])
 @jwt_required()
 @admin_required
 def update_podcast(podcast_id):
-    # Query the database for the Podcast with the given ID, return a 404 if not found
-    podcast = Podcast.query.get_or_404(podcast_id)
+    # Query the database for the Podcast with the given ID
+    podcast = Podcast.query.get(podcast_id)
+
+    if podcast is None:
+        return make_response(jsonify({"message": "There is no podcast with that ID"}), 404)
 
     title = request.json.get('title', None)
     description = request.json.get('description', None)
@@ -76,16 +91,20 @@ def update_podcast(podcast_id):
     return make_response(jsonify({"message": "Podcast updated successfully"}), 200)
 
 # Delete a podcast
+
+
 @podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['DELETE'])
 @jwt_required()
 @admin_required
 def delete_podcast(podcast_id):
-    # Query the database for the Podcast with the given ID, return a 404 if not found
-    podcast = Podcast.query.get_or_404(podcast_id)
+    # Query the database for the Podcast with the given ID
+    podcast = Podcast.query.get(podcast_id)
+
+    if podcast is None:
+        return make_response(jsonify({"message": "There is no podcast with that ID"}), 404)
 
     # Remove the Podcast from the database
     db.session.delete(podcast)
     db.session.commit()
 
     return make_response(jsonify({"message": "Podcast deleted successfully"}), 200)
-
