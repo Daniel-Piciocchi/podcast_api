@@ -5,13 +5,14 @@ from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from config import Config
-
+from datetime import timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(16)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///podcast_api.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(16)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)  # Added this line
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)

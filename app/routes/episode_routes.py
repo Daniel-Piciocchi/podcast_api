@@ -40,7 +40,11 @@ def get_all_episodes():
 @episode_bp.route('/api/episodes/<int:episode_id>', methods=['GET'])
 def get_episode(episode_id):
     # Query the database for the Episode with the given ID, return a 404 if not found
-    episode = Episode.query.get_or_404(episode_id)
+    episode = Episode.query.get(episode_id)
+
+    if episode is None:
+        return make_response(jsonify({"message": "There is no episode with that ID"}), 404)
+        
     result = episode_schema.dump(episode)
     return make_response(jsonify(result), 200)
 
@@ -49,8 +53,11 @@ def get_episode(episode_id):
 @jwt_required()
 @admin_required
 def update_episode(episode_id):
-    # Query the database for the Episode with the given ID, return a 404 if not found
-    episode = Episode.query.get_or_404(episode_id)
+    # Query the database for the Episode with the given ID
+    episode = Episode.query.get(episode_id)
+
+    if episode is None:
+        return make_response(jsonify({"message": "There is no episode with that ID"}), 404)
 
     title = request.json.get('title', None)
     podcast_id = request.json.get('podcast_id', None)
@@ -73,10 +80,15 @@ def update_episode(episode_id):
 @jwt_required()
 @admin_required
 def delete_episode(episode_id):
-    # Query the database for the Episode with the given ID, return a 404 if not found
-    episode = Episode.query.get_or_404(episode_id)
+    # Query the database for the Episode with the given ID
+    episode = Episode.query.get(episode_id)
+
+    if episode is None:
+        return make_response(jsonify({"message": "There is no episode with that ID"}), 404)
+
     # Remove the Episode from the database
     db.session.delete(episode)
     db.session.commit()
 
     return make_response(jsonify({"message": "Episode deleted successfully"}), 200)
+
