@@ -2,14 +2,16 @@ from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app import app, db
 from app.models import Episode, User, EpisodeSchema
+from app.utils import admin_required
 
 episode_bp = Blueprint("episode_bp", __name__)
 episode_schema = EpisodeSchema()
 episodes_schema = EpisodeSchema(many=True)
 
 # Add a new episode
-@app.route('/api/episodes', methods=['POST'])
+@episode_bp.route('/api/episodes', methods=['POST'])
 @jwt_required()
+@admin_required
 def add_episode():
     title = request.json.get('title', None)
     podcast_id = request.json.get('podcast_id', None)
@@ -27,7 +29,7 @@ def add_episode():
     return make_response(jsonify({"message": "Episode added successfully"}), 201)
 
 # Retrieve all episodes
-@app.route('/api/episodes', methods=['GET'])
+@episode_bp.route('/api/episodes', methods=['GET'])
 def get_all_episodes():
     # Query the database for all Episode records
     episodes = Episode.query.all()
@@ -35,7 +37,7 @@ def get_all_episodes():
     return make_response(jsonify(result), 200)
 
 # Retrieve a single episode by its ID
-@app.route('/api/episodes/<int:episode_id>', methods=['GET'])
+@episode_bp.route('/api/episodes/<int:episode_id>', methods=['GET'])
 def get_episode(episode_id):
     # Query the database for the Episode with the given ID, return a 404 if not found
     episode = Episode.query.get_or_404(episode_id)
@@ -43,8 +45,9 @@ def get_episode(episode_id):
     return make_response(jsonify(result), 200)
 
 # Update an episode
-@app.route('/api/episodes/<int:episode_id>', methods=['PUT'])
+@episode_bp.route('/api/episodes/<int:episode_id>', methods=['PUT'])
 @jwt_required()
+@admin_required
 def update_episode(episode_id):
     # Query the database for the Episode with the given ID, return a 404 if not found
     episode = Episode.query.get_or_404(episode_id)
@@ -66,8 +69,9 @@ def update_episode(episode_id):
     return make_response(jsonify({"message": "Episode updated successfully"}), 200)
 
 # Delete an episode
-@app.route('/api/episodes/<int:episode_id>', methods=['DELETE'])
+@episode_bp.route('/api/episodes/<int:episode_id>', methods=['DELETE'])
 @jwt_required()
+@admin_required
 def delete_episode(episode_id):
     # Query the database for the Episode with the given ID, return a 404 if not found
     episode = Episode.query.get_or_404(episode_id)

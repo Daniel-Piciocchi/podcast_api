@@ -2,16 +2,16 @@ from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app import app, db
 from app.models import Podcast, User, PodcastSchema
+from app.utils import admin_required
 
 podcast_bp = Blueprint("podcast_bp", __name__)
 podcast_schema = PodcastSchema()
 podcasts_schema = PodcastSchema(many=True)
 
 # Add a new podcast
-
-
-@app.route('/api/podcasts', methods=['POST'])
+@podcast_bp.route('/api/podcasts', methods=['POST'])
 @jwt_required()
+@admin_required
 def add_podcast():
     title = request.json.get('title', None)
     description = request.json.get('description', None)
@@ -35,9 +35,7 @@ def add_podcast():
     return make_response(jsonify({"message": "Podcast added successfully"}), 201)
 
 # Retrieve all podcasts
-
-
-@app.route('/api/podcasts', methods=['GET'])
+@podcast_bp.route('/api/podcasts', methods=['GET'])
 def get_all_podcasts():
     # Query the database for all Podcast records
     podcasts = Podcast.query.all()
@@ -45,9 +43,7 @@ def get_all_podcasts():
     return make_response(jsonify(result), 200)
 
 # Retrieve a single podcast by its ID
-
-
-@app.route('/api/podcasts/<int:podcast_id>', methods=['GET'])
+@podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['GET'])
 def get_podcast(podcast_id):
     # Query the database for the Podcast with the given ID, return a 404 if not found
     podcast = Podcast.query.get_or_404(podcast_id)
@@ -55,10 +51,9 @@ def get_podcast(podcast_id):
     return make_response(jsonify(result), 200)
 
 # Update a podcast
-
-
-@app.route('/api/podcasts/<int:podcast_id>', methods=['PUT'])
+@podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['PUT'])
 @jwt_required()
+@admin_required
 def update_podcast(podcast_id):
     # Query the database for the Podcast with the given ID, return a 404 if not found
     podcast = Podcast.query.get_or_404(podcast_id)
@@ -81,10 +76,9 @@ def update_podcast(podcast_id):
     return make_response(jsonify({"message": "Podcast updated successfully"}), 200)
 
 # Delete a podcast
-
-
-@app.route('/api/podcasts/<int:podcast_id>', methods=['DELETE'])
+@podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['DELETE'])
 @jwt_required()
+@admin_required
 def delete_podcast(podcast_id):
     # Query the database for the Podcast with the given ID, return a 404 if not found
     podcast = Podcast.query.get_or_404(podcast_id)
@@ -94,3 +88,4 @@ def delete_podcast(podcast_id):
     db.session.commit()
 
     return make_response(jsonify({"message": "Podcast deleted successfully"}), 200)
+

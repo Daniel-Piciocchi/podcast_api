@@ -1,6 +1,6 @@
 from functools import wraps
-from flask import request, jsonify
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+from flask import jsonify
+from flask_jwt_extended import verify_jwt_in_request, get_jwt
 
 def check_admin(claims):
     if not claims.get("is_admin", False):
@@ -13,11 +13,12 @@ def authenticate(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def authenticate_and_authorize_admin(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
+def admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
         verify_jwt_in_request()
-        claims = get_jwt_identity()
-        check_admin(claims)
-        return f(*args, **kwargs)
-    return decorated_function
+        jwt_claims = get_jwt()
+        if not jwt_claims.get("is_admin", False):  # Check for the is_admin claim
+            return jsonify({"message": "Admin access required"}), 403
+        return fn(*args, **kwargs)
+    return wrapper

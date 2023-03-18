@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app import app, db
 from app.models import Rating, RatingSchema
+from app.utils import admin_required
 
 rating_bp = Blueprint("rating_bp", __name__)
 rating_schema = RatingSchema()
@@ -44,19 +45,24 @@ def get_all_ratings():
 @app.route('/api/ratings/<int:rating_id>', methods=['GET'])
 def get_rating(rating_id):
     # Query the database for a specific Rating record by its ID
-    rating = Rating.query.get_or_404(rating_id)
+    rating = Rating.query.get(rating_id)
+    
+    if rating is None:
+        return make_response(jsonify({"message": "There is no rating with that ID"}), 404)
+
     result = rating_schema.dump(rating)
     return make_response(jsonify(result), 200)
 
 # Update a specific rating
-
-
 @app.route('/api/ratings/<int:rating_id>', methods=['PUT'])
 @jwt_required()
 def update_rating(rating_id):
     user_id = get_jwt_identity()
     # Query the database for a specific Rating record by its ID
-    rating = Rating.query.get_or_404(rating_id)
+    rating = Rating.query.get(rating_id)
+
+    if rating is None:
+        return make_response(jsonify({"message": "There is no rating with that ID"}), 404)
 
     if rating.user_id != user_id:
         return make_response(jsonify({"message": "Unauthorized action"}), 403)
@@ -72,15 +78,18 @@ def update_rating(rating_id):
 
     return make_response(jsonify({"message": "Rating updated successfully"}), 200)
 
-# Delete a specific rating
 
 
 @app.route('/api/ratings/<int:rating_id>', methods=['DELETE'])
 @jwt_required()
+@admin_required
 def delete_rating(rating_id):
     user_id = get_jwt_identity()
     # Query the database for a specific Rating record by its ID
-    rating = Rating.query.get_or_404(rating_id)
+    rating = Rating.query.get(rating_id)
+
+    if rating is None:
+        return make_response(jsonify({"message": "There is no rating with that ID"}), 404)
 
     if rating.user_id != user_id:
         return make_response(jsonify({"message": "Unauthorized action"}), 403)

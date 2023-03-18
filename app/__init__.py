@@ -2,7 +2,6 @@ import secrets
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-# from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from config import Config
@@ -18,7 +17,6 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 jwt = JWTManager(app)
 migrate = Migrate(app, db)
-# CORS(app)
 
 # Import the routes after the app has been created to avoid circular import issues.
 from app.routes import user_routes, podcast_routes, episode_routes, rating_routes, genre_routes
