@@ -1,8 +1,8 @@
 import unittest
 import json
 from app import app, db
-from app.models import User, Podcast
-
+from app.models.user_models import User
+from app.models.podcast_models import Podcast
 
 class TestPodcastAPI(unittest.TestCase):
 

@@ -1,5 +1,5 @@
 import secrets
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
@@ -12,7 +12,7 @@ app.config['SECRET_KEY'] = secrets.token_hex(16)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///podcast_api.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(16)
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)  # Added this line
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=100)  # Added this line
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
@@ -29,3 +29,7 @@ app.register_blueprint(podcast_routes.podcast_bp)
 app.register_blueprint(episode_routes.episode_bp)
 app.register_blueprint(rating_routes.rating_bp)
 app.register_blueprint(genre_routes.genre_bp)
+
+@app.errorhandler(405)
+def handle_bad_request(e):
+    return jsonify({"error": "route does not exist!"}), 405

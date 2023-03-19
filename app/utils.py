@@ -6,7 +6,7 @@ from flask_jwt_extended import verify_jwt_in_request, get_jwt
 
 
 def check_admin(claims):
-    if not claims.get("is_admin", False):
+    if not claims.get("is_admin", True):
         raise Exception("You do not have the required permissions")
 
 # Decorator to authenticate a user using JWT
@@ -30,6 +30,7 @@ def admin_required(fn):
         verify_jwt_in_request()
         # Gets the JWT claims
         jwt_claims = get_jwt()
+        print(jwt_claims)
         # Checks if the user has the is_admin claim set to True
         if not jwt_claims.get("is_admin", False):
             return jsonify({"message": "Admin access required"}), 403
