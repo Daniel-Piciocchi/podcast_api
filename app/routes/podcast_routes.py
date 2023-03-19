@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, make_response
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required
 from app import app, db
 from app.models import Podcast, User, PodcastSchema
 from app.utils import admin_required
@@ -8,7 +8,7 @@ podcast_bp = Blueprint("podcast_bp", __name__)
 podcast_schema = PodcastSchema()
 podcasts_schema = PodcastSchema(many=True)
 
-# Add a new podcast
+# Adds a new podcast
 
 
 @podcast_bp.route('/api/podcasts', methods=['POST'])
@@ -23,12 +23,12 @@ def add_podcast():
     if not title or not description or not author_id or not genre_id:
         return make_response(jsonify({"message": "Missing required data"}), 400)
 
-    # Find the author by the provided author_id
+    # Finds the author by the provided author_id
     author = User.query.get(author_id)
     if not author:
         return make_response(jsonify({"message": "Author not found"}), 404)
 
-    # Create a new Podcast instance and add it to the database
+    # Creates a new Podcast instance and adds it to the database
     new_podcast = Podcast(title=title, description=description,
                           author_id=author_id, genre_id=genre_id)
     db.session.add(new_podcast)
@@ -36,22 +36,22 @@ def add_podcast():
 
     return make_response(jsonify({"message": "Podcast added successfully"}), 201)
 
-# Retrieve all podcasts
+# Retrieves all podcasts
 
 
 @podcast_bp.route('/api/podcasts', methods=['GET'])
 def get_all_podcasts():
-    # Query the database for all Podcast records
+    # Queries the database for all Podcast records
     podcasts = Podcast.query.all()
     result = podcasts_schema.dump(podcasts)
     return make_response(jsonify(result), 200)
 
-# Retrieve a single podcast by its ID
+# Retrieves a single podcast by its ID
 
 
 @podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['GET'])
 def get_podcast(podcast_id):
-    # Query the database for the Podcast with the given ID
+    # Queries the database for the Podcast with the given ID
     podcast = Podcast.query.get(podcast_id)
 
     if podcast is None:
@@ -60,14 +60,14 @@ def get_podcast(podcast_id):
     result = podcast_schema.dump(podcast)
     return make_response(jsonify(result), 200)
 
-# Update a podcast
+# Updates a podcast
 
 
 @podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['PUT'])
 @jwt_required()
 @admin_required
 def update_podcast(podcast_id):
-    # Query the database for the Podcast with the given ID
+    # Queries the database for the Podcast with the given ID
     podcast = Podcast.query.get(podcast_id)
 
     if podcast is None:
@@ -80,30 +80,30 @@ def update_podcast(podcast_id):
     if not title or not description or not genre_id:
         return make_response(jsonify({"message": "Missing required data"}), 400)
 
-    # Update the Podcast attributes with the provided data
+    # Updates the Podcast attributes with the provided data
     podcast.title = title
     podcast.description = description
     podcast.genre_id = genre_id
 
-    # Commit the changes to the database
+    # Commits the changes to the database
     db.session.commit()
 
     return make_response(jsonify({"message": "Podcast updated successfully"}), 200)
 
-# Delete a podcast
+# Deletes a podcast
 
 
 @podcast_bp.route('/api/podcasts/<int:podcast_id>', methods=['DELETE'])
 @jwt_required()
 @admin_required
 def delete_podcast(podcast_id):
-    # Query the database for the Podcast with the given ID
+    # Queries the database for the Podcast with the given ID
     podcast = Podcast.query.get(podcast_id)
 
     if podcast is None:
         return make_response(jsonify({"message": "There is no podcast with that ID"}), 404)
 
-    # Remove the Podcast from the database
+    # Removes the Podcast from the database
     db.session.delete(podcast)
     db.session.commit()
 

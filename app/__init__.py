@@ -20,11 +20,10 @@ jwt = JWTManager(app)
 migrate = Migrate(app, db)
 
 # Import the routes after the app has been created to avoid circular import issues.
-from app.routes import user_routes, podcast_routes, episode_routes, rating_routes, genre_routes
 from app.routes.search_routes import search_bp
+from app.routes import user_routes, podcast_routes, episode_routes, rating_routes, genre_routes
 
 app.register_blueprint(search_bp)
-
 app.register_blueprint(user_routes.user_bp)
 app.register_blueprint(podcast_routes.podcast_bp)
 app.register_blueprint(episode_routes.episode_bp)

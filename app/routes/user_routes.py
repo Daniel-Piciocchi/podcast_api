@@ -62,9 +62,10 @@ def get_all_users():
 @user_bp.route('/api/users/<int:user_id>', methods=['GET'])
 @admin_required
 def get_user(user_id):
-    user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(user_id, description="There is no user with that ID")
     result = user_schema.dump(user)
     return make_response(jsonify(result), 200)
+
 
 # Get the current user's profile
 @user_bp.route('/api/users/profile', methods=['GET'])
